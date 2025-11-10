@@ -3,46 +3,30 @@ describe('Transferencias', () => {
   beforeEach(() => {
     //Arrange
     cy.visit('/')
-    cy.fixture('credenciais').then(credenciais => {
-        cy.get('#username').click().type(credenciais.valida.usuario)
-        cy.get('#senha').click().type(credenciais.valida.senha)
-    })
-    cy.contains('button', 'Entrar').click()
+    cy.fazerLoginComCredenciaisValidas()
   })
 
   it('Deve transferir quando informo dados validados.', () => {
-    cy.get('label[for="conta-origem"]').parent().as('campo-conta-origem')
-    cy.get('@campo-conta-origem').click()
-    cy.get('@campo-conta-origem').contains('João da Silva').click()
 
-    cy.get('label[for="conta-destino"]').parent().as('campo-conta-destino')
-    cy.get('@campo-conta-destino').click()
-    cy.get('@campo-conta-destino').contains('Maria Oliveira').click()
+    cy.selecionarOpcaoNaCombobox('conta-origem', 'João da Silva')
+    cy.selecionarOpcaoNaCombobox('conta-destino', 'Maria Oliveira')
     cy.get('#valor').click().type('11')
-
     cy.contains('button', 'Transferir').click()
- 
-    // cy.get('.toast').should('have.text', 'Transferência realizada!')  
 
-    //Assert
-    // cy.contains('h4','Realizar Transferência').should('be.visible')
+    cy.verificarMensagemNoToast('Transferência realizada!')
+ 
   })
 
-//   it.only('Login com dados Inválidos deve apresentar mensagem de erro', () => {
+  it('Deve transferir erro quando tentar transferir mais que 5 mil sem token.', () => {
 
-//     //Act
-//     cy.fixture('credenciais').then(credenciais => {
-//     cy.get('#username').click().type(credenciais.invalida.usuario)
-//     cy.get('#senha').click().type(credenciais.invalida.senha)
-//     })
-//     // cy.get('#login-section > .btn').click()
-//     cy.contains('button', 'Entrar').click()
+    cy.selecionarOpcaoNaCombobox('conta-origem', 'João da Silva')
+    cy.selecionarOpcaoNaCombobox('conta-destino', 'Maria Oliveira')
+    cy.get('#valor').click().type('5000.01')
+    cy.contains('button', 'Transferir').click()
 
-//     //Assert
-//     cy.get('.toast').should('have.text', 'Erro no login. Tente novamente.')
+    cy.verificarMensagemNoToast('Autenticação necessária para transferências acima de R$5.000,00.')
+ 
 
-
-//   })  
-
+  })
 
 })
